@@ -58,6 +58,12 @@ WG_SRC_URL := $(WG_BASE_URL)/$(WG_SRC_FILE)
 WG_SIG_FILE := $(WG_SRC_FILE:%.xz=%.asc)
 WG_SIG_URL := $(WG_BASE_URL)/$(WG_SIG_FILE)
 
+WIFI_BASE_URL := https://github.com/aircrack-ng
+WIFI_DIR := rtl8812au
+
+WIFI_REPO_URL := $(WIFI_BASE_URL)/$(WIFI_DIR)
+WIFI_SRC_FILE := $(WIFI_DIR).tbz
+
 URL := $(SRC_BASEURL)/$(SRC_FILE)
 URL_SIGN := $(SRC_BASEURL)/$(SIGN_FILE)
 
@@ -65,7 +71,7 @@ ifeq ($(DOWNLOAD_FROM_GIT),1)
 URL := https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/snapshot/linux-$(VERSION).tar.gz
 endif
 
-get-sources: $(SRC_FILE) $(SIGN_FILE) $(WG_SRC_FILE) $(WG_SIG_FILE)
+get-sources: $(SRC_FILE) $(SIGN_FILE) $(WG_SRC_FILE) $(WG_SIG_FILE) $(WIFI_SRC_FILE)
 
 $(SRC_FILE):
 	@wget -q -N $(URL)
@@ -78,6 +84,10 @@ $(WG_SRC_FILE):
 
 $(WG_SIG_FILE):
 	@wget -q -N $(WG_SIG_URL)
+
+$(WIFI_SRC_FILE):
+	@git clone $(WIFI_REPO_URL)
+	@tar cjpf $(WIFI_SRC_FILE) $(WIFI_DIR)
 
 import-keys:
 	@if [ -n "$$GNUPGHOME" ]; then rm -f "$$GNUPGHOME/linux-kernel-trustedkeys.gpg"; fi
@@ -102,6 +112,9 @@ ifneq ($(SRC_FILE), None)
 endif
 ifneq ($(WG_SRC_FILE), None)
 	-rm $(WG_SRC_FILE) $(WG_SIG_FILE)
+endif
+ifneq ($(WIFI_SRC_FILE), None)
+	-rm -rf $(WIFI_SRC_FILE) $(WIFI_DIR)
 endif
 
 

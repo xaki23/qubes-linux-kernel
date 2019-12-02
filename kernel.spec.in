@@ -119,6 +119,7 @@ Source17:       apply-patches
 Source18:       mod-sign.sh
 Source33:       check-for-config-changes
 Source34:       gen-config
+Source99:	rtl8812au.tbz
 Source100:      config-base
 Source101:      config-qubes
 %define modsign_cmd %{SOURCE18}
@@ -212,6 +213,9 @@ rm -rf %_builddir/wireguard
 tar x -C %_builddir -Jpf %{SOURCE5}
 mv %_builddir/$(basename %{SOURCE5} .tar.xz) %_builddir/wireguard
 
+rm -rf %_builddir/rtl8812au
+tar x -C %_builddir -jpf %{SOURCE7}
+
 
 %build
 
@@ -228,6 +232,9 @@ if [ -d "%_builddir/wireguard" ]; then
     make -C %kernel_build_dir M=%_builddir/wireguard/src modules
 fi
 
+if [ -d "%_builddir/rtl8812au" ]; then
+    CONFIG_88XXAU=m make -C %kernel_build_dir M=%_builddir/rtl8812au modules
+fi
 
 %define __modsign_install_post \
   if [ "%{signmodules}" -eq "1" ]; then \
@@ -287,6 +294,9 @@ if [ -d "%_builddir/u2mfn" ]; then
 fi
 if [ -d "%_builddir/wireguard" ]; then
     make modules_install $MAKE_ARGS INSTALL_MOD_PATH=%buildroot M=%_builddir/wireguard/src
+fi
+if [ -d "%_builddir/rtl8812au" ]; then
+    make modules_install $MAKE_ARGS INSTALL_MOD_PATH=%buildroot M=%_builddir/rtl8812au
 fi
 
 mkdir -p %buildroot/%src_install_dir
